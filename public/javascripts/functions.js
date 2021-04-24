@@ -1,5 +1,3 @@
-const { post } = require("../../app")
-
 const mainContener = document.querySelector("#mainContener")
 
 const homeFunction = () => {
