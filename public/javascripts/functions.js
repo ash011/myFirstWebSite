@@ -30,6 +30,7 @@ function registerFunction(){
     mainContener.innerHTML = ""
     mainContener.insertAdjacentHTML("afterbegin", `
     <form id="registerForm">
+        <p id="regErrPtag" class="text-danger"></p>
         <div class="form-group">
             <label for="username">User Name:</label>
             <input type="text" class="form-control" placeholder="Enter username" name="username">
@@ -48,6 +49,7 @@ function registerFunction(){
         <button id="forLoginbtn" class="btn btn-success">LogIn</button>
     </p>
     `)
+    let regErrPtag = document.getElementById("regErrPtag")
     let registerForm = document.getElementById("registerForm")
     registerForm.addEventListener("submit", (e) => {
         e.preventDefault()
@@ -65,7 +67,13 @@ function registerFunction(){
             body: JSON.stringify(registerUserInfo)
         }).then(res=>res.json())
         .then(data=>{
-            
+            let {error} = data
+            if(error){
+                return regErrPtag.innerHTML = error
+            } else {
+                console.log(data)
+                loginFunction()
+            }
         })
     })
 
