@@ -1,11 +1,36 @@
 const mainContener = document.querySelector("#mainContener")
 
 const homeFunction = () => {
+    fetch("/", {
+        method: "POST",
+        headers:{
+            "Authorization":"Bearer " + localStorage.getItem("accessToken"),
+            "Content-Type":"application/json"
+        }
+    }).then(res => res.json())
+    .then(data => {
+        let {error} = data
+        if(error){
+            if(error == "jwt expired"){
+                refreshTokensFunction()
+                return
+            }
+            alert(error)
+            loginFunction()
+            return
+        }
+        let {userInfo} = data;
+        let {username} = userInfo
 
+        mainContener.innerHTML = ""
+        mainContener.insertAdjacentHTML("afterbegin", `
+            <h1 class="text-central">${username}</h1>
+        `)
+    })
 }
 
 const loginFunction = () => {
-    mainContener.innerHTML = ""
+    
     mainContener.insertAdjacentHTML("afterbegin", `
     <form id="loginForn">
         <p id="loginErrPtag" class="text-danger"></p>
@@ -47,7 +72,7 @@ const loginFunction = () => {
             
             localStorage.setItem("accessToken", accessToken)
             localStorage.setItem("refreshToken", refreshToken)
-            location.hresh = "/"
+            location.href = "/"
             
         })
     })
@@ -155,5 +180,26 @@ function verifyFunction(userId) {
             } 
             loginFunction()
         })
+    })
+}
+
+function refreshTokensFunction(){
+    fetch("/auth/refreshtokens", {
+        method: "POST",
+        headers:{
+            "Authorization":"Bearer " + localStorage.getItem("refreshToken"),
+            "Content-Type":"application/json"
+        }
+    }).then(res => res.json())
+    .then(data => {
+        let {error, accessToken, refreshToken} = data
+        if(error){
+            alert(error)
+            loginFunction()
+            return
+        }
+        localStorage.setItem("accessToken", accessToken)
+        localStorage.setItem("refreshToken", refreshToken)
+        location.hresh = "/"
     })
 }
