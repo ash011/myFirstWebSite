@@ -1,11 +1,13 @@
 const nodemailer = require("nodemailer");
 
+require("dotenv").config()
+
 const config = {
     host: "gmail.com",
     service: "Gmail",
     auth: {
-        user: "ashsnode.js@gmail.com",
-        pass: "nodejs2021"
+        user: process.env.EMAIL,
+        pass: process.env.PASSWORD
     },
     tls:{
         rejectUnauthorized: false

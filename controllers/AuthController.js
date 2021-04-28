@@ -2,6 +2,7 @@ const {UserModel} = require("../models/UserModel");
 const bcrypt = require("bcryptjs");
 const random = require("random");
 const { sendMail } = require("./mailController");
+const { getTokens } = require("./TokenController");
 
 class AuthController{
     async registerUser(req, res){
@@ -19,9 +20,7 @@ class AuthController{
             if(result && result.response)
             res.json({id:savedUser._id, username:savedUser.username, email:savedUser.email,emailSent:true})
             else
-            res.json({id:savedUser._id, username:savedUser.username, email:savedUser.email,emailSent:false})
-
-        
+            res.json({id:savedUser._id, username:savedUser.username, email:savedUser.email,emailSent:false}) 
         }catch(err){
             console.log(err)
             res.json({error: err.message})
@@ -31,7 +30,7 @@ class AuthController{
         try{
             let user = await UserModel.findOne({_id:req.body.id})
             if(!user){
-                res.json({error: "No suche user"})
+                return res.json({error: "No suche user"})
             } 
             if(`${req.body.code}` === `${user.isEmailVerifyCode.code}`){
                 user.isEmailVerifyCode.isVerify = true
@@ -42,6 +41,26 @@ class AuthController{
             }
         }catch(err){
             console.log(err)
+            res.json({error: err.message})
+        }
+    };
+
+    async loginUser(req, res){
+        try{
+            let user = await UserModel.findOne({email: req.body.email})
+            if(!user){
+               return res.json({error: "Invalid email or password"})
+            } 
+            let passwordOk = bcrypt.compareSync(req.body.password, user.password);
+            if(!passwordOk) return res.json({error: "Invalid email or password"})
+
+            let {error} = getTokens(user)
+            if(error) return res.json({error})
+
+            let {accessToken, refreshToken} = await getTokens(user);
+
+            res.json({user, accessToken, refreshToken})
+        }catch(err){
             res.json({error: err.message})
         }
     }

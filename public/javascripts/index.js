@@ -1,4 +1,4 @@
-if(localStorage.getItem("accesToken")){
+if(localStorage.getItem("accessToken")){
     homeFunction()
 } else {
     loginFunction()

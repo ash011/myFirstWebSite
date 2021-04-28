@@ -7,7 +7,8 @@ const homeFunction = () => {
 const loginFunction = () => {
     mainContener.innerHTML = ""
     mainContener.insertAdjacentHTML("afterbegin", `
-    <form>
+    <form id="loginForn">
+        <p id="loginErrPtag" class="text-danger"></p>
         <div class="form-group">
             <label for="email">Email address:</label>
             <input type="email" class="form-control" placeholder="Enter email" name="email">
@@ -22,6 +23,35 @@ const loginFunction = () => {
         <button id="forRegisterBtn" class="btn btn-success">Register Now</button>
     </p>
     `)
+    let loginErrPtag = document.getElementById("loginErrPtag")
+    let loginForn = document.getElementById("loginForn")
+    loginForn.addEventListener("submit", (e) => {
+        e.preventDefault()
+        let loginUserInfo = {
+            email: loginForn.elements["email"].value,
+            password: loginForn.elements["password"].value
+        }
+        fetch("/auth/login", {
+            method: "POST",
+            headers: {
+                "Content-Type":"application/json",
+                "Accept":"application/json"
+            },
+            body: JSON.stringify(loginUserInfo)
+        }).then(res=>res.json())
+        .then(data=>{
+            let {error, accessToken, refreshToken} = data
+            if(error){
+                return loginErrPtag.innerHTML = error
+            } 
+            
+            localStorage.setItem("accessToken", accessToken)
+            localStorage.setItem("refreshToken", refreshToken)
+            location.hresh = "/"
+            
+        })
+    })
+
     let forRegisterBtn = document.getElementById("forRegisterBtn")
     forRegisterBtn.addEventListener("click", registerFunction)
 }
@@ -67,8 +97,7 @@ function registerFunction(){
             body: JSON.stringify(registerUserInfo)
         }).then(res=>res.json())
         .then(data=>{
-            let {error, emailSent, id} = data
-            console.log(emailSent)
+            let {error, emailSent, id} = data;
             if(error){
                 return regErrPtag.innerHTML = error
             } 
@@ -86,7 +115,6 @@ function registerFunction(){
 }
 
 function verifyFunction(userId) {
-    console.log(userId)
     mainContener.innerHTML = ""
     mainContener.insertAdjacentHTML("afterbegin", `
     <form id="verifyForm">

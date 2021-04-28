@@ -18,6 +18,24 @@ let validateRegisterInfo = (req, res, next) =>{
     }
 }
 
+let validateLoginInfo = (req, res, next) =>{
+    try{
+        let Schema = Joi.object({
+            email: Joi.string().min(3).max(100).email().required(),
+            password: Joi.string().min(6).max(100).required()
+        })
+        let {error} = Schema.validate(req.body)
+        if(error){
+            return res.json({error: error.details[0].message})
+        }
+        next()
+    }catch(err){
+        console.log(err)
+        res.json({Error:err.message})
+    }
+}
+
 module.exports = {
-    validateRegisterInfo
+    validateRegisterInfo,
+    validateLoginInfo
 }
