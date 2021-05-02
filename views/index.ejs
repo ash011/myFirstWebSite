@@ -1,6 +1,27 @@
 <%- include ./components/header %>
-<main id="mainContener" class="text-center p-5">
-
+<main id="mainContener" class="text-center">
+    <div class="continer-fluid" id="userInfoContainer">
+        <h1>User Info</h1>
+    </div>
+    <div class="continer-fluid">
+        <div class="row">
+            <div class="col-md-2" id="nonFriendsUsersContainer">
+                <h5>Add Friend</h5>
+            </div>
+            <div class="col-md-8" id="postsContainer">
+                <h3>Posts</h3>
+            </div>
+            <div class="col-md-2" id="onlinesContainer">
+                <h3>Onlines</h3>
+                <div id="nowOnlinesContainer">
+    
+                </div>
+                <div id="privateMessagesContainer">
+                    
+                </div>
+            </div>
+        </div>
+    </div>
 </main>
 <%- include ./components/footer %>
 

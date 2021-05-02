@@ -8,7 +8,8 @@ async function getTokens(user){
         let payLoad = {
             id: user._id,
             email: user.email,
-            username: user.username
+            username: user.username,
+            image: user.image
         }
         let accessToken = jwt.sign(payLoad, process.env.jwtAccessSecret, {expiresIn: process.env.jwtAccessSecretLT});
         let refreshTokenObj = await TokenModel.create({userId: user._id});

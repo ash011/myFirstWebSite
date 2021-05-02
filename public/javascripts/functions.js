@@ -1,4 +1,10 @@
-const mainContener = document.querySelector("#mainContener")
+const mainContener = document.querySelector("#mainContener");
+const userInfoContainer = document.querySelector("#userInfoContainer");
+const nonFriendsUsersContainer = document.querySelector("#nonFriendsUsersContainer");
+const postsContainer = document.querySelector("#postsContainer");
+const onlineContainer = document.querySelector("#onlineContainer");
+const privateMessagesContainer = document.querySelector("#privateMessagesContainer");
+
 
 const homeFunction = () => {
     fetch("/", {
@@ -15,18 +21,26 @@ const homeFunction = () => {
                 refreshTokensFunction()
                 return
             }
-            alert(error)
             loginFunction()
             return
         }
         let {userInfo} = data;
-        let {username} = userInfo
+        homePageViewWidthContent(userInfo)
 
-        mainContener.innerHTML = ""
-        mainContener.insertAdjacentHTML("afterbegin", `
-            <h1 class="text-central">${username}</h1>
-        `)
+       
     })
+}
+
+function homePageViewWidthContent(userInfo){
+    let {username, image, id} = userInfo;
+
+    userInfoContainer.insertAdjacentHTML("afterbegin", `
+        <img src="/images/${image}" width="300px" height="300px">
+        <h1>${username}</h1>
+        <p>
+            <a href="/profile/${id}">Profile</a>
+        </p>
+    `)
 }
 
 const loginFunction = () => {
@@ -200,6 +214,6 @@ function refreshTokensFunction(){
         }
         localStorage.setItem("accessToken", accessToken)
         localStorage.setItem("refreshToken", refreshToken)
-        location.hresh = "/"
+        location.href = "/"
     })
 }
