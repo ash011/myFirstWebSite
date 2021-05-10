@@ -13,8 +13,8 @@ async function getTokens(user){
         }
         let accessToken = jwt.sign(payLoad, process.env.jwtAccessSecret, {expiresIn: process.env.jwtAccessSecretLT});
         let refreshTokenObj = await TokenModel.create({userId: user._id});
-        let playLoadRefresh = {tokenId: refreshTokenObj._id};
-        let refreshToken = jwt.sign(playLoadRefresh, process.env.jwtRefreshSecret, {expiresIn: process.env.jwtRefreshSecretLT});
+        let payLoadRefresh = {tokenId: refreshTokenObj._id};
+        let refreshToken = jwt.sign(payLoadRefresh, process.env.jwtRefreshSecret, {expiresIn: process.env.jwtRefreshSecretLT});
     
         return { accessToken, refreshToken }
     }catch(err){

@@ -4,9 +4,12 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const mongoose = require("mongoose")
+const http = require('http');
+const jwt = require("jsonwebtoken")
 
 const indexRouter = require('./routes/IndexRouter');
 const authRouter = require('./routes/AuthRouter');
+const { isObject } = require('util');
 require("dotenv").config();
 
 (async () => {
@@ -22,6 +25,64 @@ require("dotenv").config();
 })();
 
 const app = express();
+
+/**
+ * Create HTTP server.
+ */
+
+const server = http.createServer(app);
+
+
+
+// start socket.io
+
+const io = require("socket.io")(server);
+
+//socket middleware
+io.use((socket, next)=>{
+  try{
+    if(socket.handshake.auth && socket.handshake.auth.token){
+      jwt.verify(socket.handshake.auth.token, process.env.jwtAccessSecret, (err, decoded)=>{
+        if(err) return next(err);
+        socket.user = {
+          id: decoded.id,
+          username: decoded.username,
+          image: decoded.image
+        }
+        next()
+      })
+    }else{
+      next(newError("no token"))
+    }
+  }catch(err){
+    next(err)
+  }
+});
+
+io.on("connection", socket => {
+  try{
+    const user = socket.user;
+
+    const id = socket.user.id;
+    let onlineUser = new Set();
+    for(let [,sockets] of io.of("/").sockets){
+      if(id == sockets.user.id) continue;
+      onlineUser.add(JSON.stringify(sockets.user))
+    };
+
+    io.to(socket.id).emit("online users", [...onlineUser]);
+    socket.broadcast.emit("user connected", user);
+    socket.on("disconnect", () => {
+      socket.broadcast.emit("user disconnect", socket.user.id)
+    })
+  }catch(err){
+    io.to(socket.id).emit("error", err.message)
+  }
+})
+
+// end socket.io
+
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -52,4 +113,7 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-module.exports = app;
+module.exports = {
+  app,
+  server
+}

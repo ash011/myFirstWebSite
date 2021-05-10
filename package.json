@@ -19,6 +19,7 @@
     "mongoose": "^5.12.5",
     "morgan": "~1.9.1",
     "nodemailer": "^6.5.0",
-    "random": "^3.0.6"
+    "random": "^3.0.6",
+    "socket.io": "^4.0.1"
   }
 }

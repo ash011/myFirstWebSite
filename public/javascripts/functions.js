@@ -2,7 +2,8 @@ const mainContener = document.querySelector("#mainContener");
 const userInfoContainer = document.querySelector("#userInfoContainer");
 const nonFriendsUsersContainer = document.querySelector("#nonFriendsUsersContainer");
 const postsContainer = document.querySelector("#postsContainer");
-const onlineContainer = document.querySelector("#onlineContainer");
+const onlinesContainer = document.querySelector("#onlinesContainer");
+const nowOnlinesContainer = document.querySelector("#nowOnlinesContainer");
 const privateMessagesContainer = document.querySelector("#privateMessagesContainer");
 
 
@@ -18,7 +19,7 @@ const homeFunction = () => {
         let {error} = data
         if(error){
             if(error == "jwt expired"){
-                refreshTokensFunction()
+                refreshTokensFunction(homeFunction)
                 return
             }
             loginFunction()
@@ -26,15 +27,15 @@ const homeFunction = () => {
         }
         let {userInfo} = data;
         homePageViewWidthContent(userInfo)
-
-       
+        //send user info from socket
+        newUserConnected()
     })
 }
 
 function homePageViewWidthContent(userInfo){
     let {username, image, id} = userInfo;
-
-    userInfoContainer.insertAdjacentHTML("afterbegin", `
+    userInfoContainer.innerHTML = "";
+    userInfoContainer.insertAdjacentHTML("beforeend", `
         <img src="/images/${image}" width="300px" height="300px">
         <h1>${username}</h1>
         <p>
@@ -46,7 +47,7 @@ function homePageViewWidthContent(userInfo){
 const loginFunction = () => {
     
     mainContener.insertAdjacentHTML("afterbegin", `
-    <form id="loginForn">
+    <form id="loginForm">
         <p id="loginErrPtag" class="text-danger"></p>
         <div class="form-group">
             <label for="email">Email address:</label>
@@ -63,12 +64,12 @@ const loginFunction = () => {
     </p>
     `)
     let loginErrPtag = document.getElementById("loginErrPtag")
-    let loginForn = document.getElementById("loginForn")
-    loginForn.addEventListener("submit", (e) => {
+    let loginForm = document.getElementById("loginForm")
+    loginForm.addEventListener("submit", (e) => {
         e.preventDefault()
         let loginUserInfo = {
-            email: loginForn.elements["email"].value,
-            password: loginForn.elements["password"].value
+            email: loginForm.elements["email"].value,
+            password: loginForm.elements["password"].value
         }
         fetch("/auth/login", {
             method: "POST",
@@ -81,6 +82,7 @@ const loginFunction = () => {
         .then(data=>{
             let {error, accessToken, refreshToken} = data
             if(error){
+                console.log(error)
                 return loginErrPtag.innerHTML = error
             } 
             
@@ -197,7 +199,7 @@ function verifyFunction(userId) {
     })
 }
 
-function refreshTokensFunction(){
+function refreshTokensFunction(functionName){
     fetch("/auth/refreshtokens", {
         method: "POST",
         headers:{
@@ -206,14 +208,14 @@ function refreshTokensFunction(){
         }
     }).then(res => res.json())
     .then(data => {
-        let {error, accessToken, refreshToken} = data
+        let {error, accessToken, refreshToken} = data;
         if(error){
             alert(error)
             loginFunction()
             return
         }
-        localStorage.setItem("accessToken", accessToken)
-        localStorage.setItem("refreshToken", refreshToken)
-        location.href = "/"
+        localStorage.setItem("accessToken", accessToken);
+        localStorage.setItem("refreshToken", refreshToken);
+        functionName()
     })
 }
